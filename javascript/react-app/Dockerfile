@@ -1,15 +1,17 @@
 FROM node:22.8.0 AS builder
+LABEL owner="JvictorMarques"
+RUN groupadd -r app && useradd -r -g app app
 WORKDIR /app
 
-COPY --chown=node:node --chmod=644 package*.json ./
+COPY --chown=app:app --chmod=644 package*.json ./
 RUN npm install
 
-COPY --chown=node:node --chmod=744 . .
+COPY --chown=app:app --chmod=744 . .
 RUN npm run build
 
-USER node
+USER app
 
-FROM nginx:stable-alpine3.20 AS final
+FROM nginx:alpine AS final
 WORKDIR /usr/share/nginx/html
 
 COPY --from=builder /app/dist .
